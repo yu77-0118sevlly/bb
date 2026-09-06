@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>个人资料</title>
+    
+    <!-- 添加到主屏幕的全屏与名称配置 -->
+    <title>支付宝</title>
+    <meta name="apple-mobile-web-app-title" content="支付宝">
+    <meta name="application-name" content="支付宝">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#F2F2F7">
+
     <style>
         /* 全局及重置 */
         :root {
@@ -26,7 +35,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            overflow: hidden; /* 防止原生滚动反弹问题，由内部视图滚动 */
+            overflow: hidden; 
         }
 
         /* 视图切换容器 */
@@ -46,14 +55,16 @@
             transform: translateX(100%);
         }
 
-        /* 导航栏 (无状态栏版) */
+        /* 导航栏 (适配主屏幕全屏后的刘海屏/灵动岛) */
         .navbar {
-            height: 44px;
+            height: calc(44px + env(safe-area-inset-top));
+            padding-top: env(safe-area-inset-top);
             background-color: var(--cell-bg);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 16px;
+            padding-left: 16px;
+            padding-right: 16px;
             font-size: 17px;
             font-weight: 500;
             position: relative;
@@ -67,7 +78,7 @@
             left: 0;
             width: 100%;
             height: 1px;
-            background-color: rgba(0, 0, 0, 0.05); /* 极浅的分割线 */
+            background-color: rgba(0, 0, 0, 0.05); 
             transform: scaleY(0.5);
         }
 
@@ -78,6 +89,7 @@
             color: var(--link-blue);
             cursor: pointer;
             font-weight: 400;
+            height: 44px;
         }
         
         .nav-right {
@@ -88,6 +100,8 @@
             flex: 1;
             text-align: center;
             font-weight: 600;
+            height: 44px;
+            line-height: 44px;
         }
 
         .nav-back-icon {
@@ -255,7 +269,7 @@
             color: var(--text-sub);
         }
 
-        /* 自定义 iOS 弹窗 (用于输入) */
+        /* 自定义 iOS 弹窗 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -312,7 +326,7 @@
             font-weight: 600;
         }
 
-        /* 自定义 Action Sheet (用于性别) */
+        /* 自定义 Action Sheet */
         .action-sheet-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -322,6 +336,7 @@
             justify-content: flex-end;
             z-index: 100;
             padding: 8px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -474,7 +489,6 @@
     </div>
 
     <script>
-        // 初始化数据
         const defaultProfile = {
             avatar: '', 
             nickname: '언니',
@@ -485,11 +499,8 @@
         };
 
         let profile = JSON.parse(localStorage.getItem('ios_profile')) || defaultProfile;
-        
-        // Modal 状态
         let currentEditField = '';
 
-        // 渲染主页数据
         function renderProfile() {
             document.getElementById('val-nickname').innerText = profile.nickname;
             document.getElementById('val-gender').innerText = profile.gender;
@@ -501,19 +512,16 @@
             if (profile.avatar) {
                 avatarImg.src = profile.avatar;
             } else {
-                // 默认占位背景色，避免破图
                 avatarImg.style.backgroundColor = '#E5E5EA';
                 avatarImg.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
             }
         }
 
-        // 保存数据
         function saveToLocal() {
             localStorage.setItem('ios_profile', JSON.stringify(profile));
             renderProfile();
         }
 
-        // --- 头像逻辑 ---
         function triggerAvatar() {
             document.getElementById('avatar-input').click();
         }
@@ -521,7 +529,6 @@
         document.getElementById('avatar-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(event) {
                 profile.avatar = event.target.result;
@@ -530,7 +537,6 @@
             reader.readAsDataURL(file);
         });
 
-        // --- 个性签名视图逻辑 ---
         const mainView = document.getElementById('main-view');
         const signatureView = document.getElementById('signature-view');
         const editSignatureInput = document.getElementById('edit-signature');
@@ -539,14 +545,11 @@
         function openSignature() {
             editSignatureInput.value = profile.signature;
             updateCharCount();
-            
-            // 切换视图动画
             signatureView.style.display = 'flex';
             setTimeout(() => {
                 signatureView.classList.remove('view-hidden');
                 mainView.classList.add('view-hidden');
             }, 10);
-            
             setTimeout(() => { editSignatureInput.focus(); }, 300);
         }
 
@@ -564,17 +567,11 @@
             closeSignature();
         }
 
-        // 字数统计实时监听
         editSignatureInput.addEventListener('input', updateCharCount);
         function updateCharCount() {
-            const max = 20;
-            const current = editSignatureInput.value.length;
-            charCount.innerText = max - current; // 仿 iOS 倒数，也可以直接显示长度 current
-            // 若需严格1:1第二张图，这里直接显示长度
-            charCount.innerText = current; 
+            charCount.innerText = editSignatureInput.value.length; 
         }
 
-        // --- 弹窗修改逻辑 (昵称、年龄、地区) ---
         const modal = document.getElementById('ios-modal');
         const modalBox = document.getElementById('modal-box');
         const modalInput = document.getElementById('modal-input');
@@ -610,7 +607,6 @@
             closeModal();
         }
 
-        // --- Action Sheet 逻辑 (性别) ---
         const actionSheet = document.getElementById('action-sheet');
         const asGroup1 = document.getElementById('as-group-1');
         const asGroup2 = document.getElementById('as-group-2');
@@ -639,7 +635,6 @@
             closeActionSheet();
         }
 
-        // 初始化执行渲染
         renderProfile();
     </script>
 </body>
