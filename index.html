@@ -10,16 +10,16 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#F2F2F7">
+    <meta name="theme-color" content="#F7F7F7">
 
     <style>
         :root {
-            --bg-color: #F2F2F7;
+            --bg-color: #F7F7F7; /* 原图为极淡浅灰背景 */
             --cell-bg: #FFFFFF;
-            --text-main: #000000;
-            --text-sub: #8A8A8E;
-            --link-blue: #1677FF; /* 修正为支付宝蓝 */
-            --divider: #E5E5EA;
+            --text-main: #1A1A1A;
+            --text-sub: #9E9E9E;
+            --link-blue: #1677FF; /* 支付宝经典蓝 */
+            --divider: #F0F0F0;
         }
 
         * {
@@ -30,10 +30,11 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            overflow: hidden; 
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         .view-container {
@@ -52,16 +53,14 @@
             transform: translateX(100%);
         }
 
-        /* 导航栏修正：背景同页面底色，无底边框，标题绝对居中 */
+        /* 顶部导航栏（无状态栏，直接从页面顶部开始） */
         .navbar {
-            height: calc(44px + env(safe-area-inset-top));
-            padding-top: env(safe-area-inset-top);
-            background-color: var(--bg-color); 
+            height: 44px;
+            background-color: var(--bg-color);
             display: flex;
-            align-items: flex-end; /* 底部对齐内容 */
+            align-items: center;
             justify-content: space-between;
-            padding-left: 12px;
-            padding-right: 16px;
+            padding: 0 16px;
             position: relative;
             z-index: 10;
         }
@@ -74,10 +73,10 @@
             position: relative;
             z-index: 2;
         }
-        
+
         .nav-right {
             color: var(--link-blue);
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 400;
         }
 
@@ -85,9 +84,6 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            bottom: 0;
-            height: 44px;
-            line-height: 44px;
             font-size: 17px;
             font-weight: 500;
             color: var(--text-main);
@@ -95,53 +91,56 @@
         }
 
         .icon-back {
-            width: 28px;
-            height: 28px;
-            stroke: #000000;
+            width: 22px;
+            height: 22px;
+            stroke: #1A1A1A;
         }
 
         .content {
             flex: 1;
             overflow-y: auto;
-            padding-bottom: 40px;
+            padding: 8px 16px 40px 16px; /* 露出左右浅灰背景 */
         }
 
-        .section-group {
-            margin-top: 12px;
+        /* 原生 Inset Grouped 圆角卡片 */
+        .card-group {
             background-color: var(--cell-bg);
+            border-radius: 10px; /* 原生自然小圆角 */
+            overflow: hidden;
         }
 
         .section-header {
-            padding: 24px 16px 8px;
-            font-size: 13px;
+            padding: 16px 8px 8px 8px;
+            font-size: 12px;
             color: var(--text-sub);
+            line-height: 1.4;
+            letter-spacing: -0.2px;
         }
 
         .cell {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            min-height: 54px;
-            padding: 14px 16px;
+            min-height: 50px;
+            padding: 12px 14px;
             background-color: var(--cell-bg);
             position: relative;
             cursor: pointer;
         }
 
         .cell:active {
-            background-color: #E5E5EA;
+            background-color: #F9F9F9;
         }
 
         .cell-no-active:active {
             background-color: var(--cell-bg);
         }
 
-        /* iOS 标准分割线，左侧留白 */
         .cell::after {
             content: '';
             position: absolute;
             bottom: 0;
-            left: 16px;
+            left: 14px;
             right: 0;
             height: 1px;
             background-color: var(--divider);
@@ -152,8 +151,8 @@
         }
 
         .cell-label {
-            font-size: 16px;
-            font-weight: 400; 
+            font-size: 15px;
+            font-weight: 400; /* 原图较细主文字 */
             color: var(--text-main);
             flex-shrink: 0;
         }
@@ -162,11 +161,11 @@
             display: flex;
             align-items: center;
             color: var(--text-sub);
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 400;
             flex: 1;
             justify-content: flex-end;
-            margin-left: 16px;
+            margin-left: 12px;
         }
 
         .cell-value {
@@ -175,95 +174,97 @@
             text-overflow: ellipsis;
         }
 
-        /* 纯 SVG 绘制极细右侧箭头 */
+        /* 极细极浅右箭头 */
         .icon-arrow {
-            width: 18px;
-            height: 18px;
+            width: 15px;
+            height: 15px;
             stroke: #C7C7CC;
             margin-left: 4px;
         }
 
-        /* 纯 SVG 绘制精细二维码占位 */
+        /* 二维码细线小图标 */
         .icon-qr {
-            width: 18px;
-            height: 18px;
-            stroke: #8A8A8E;
+            width: 16px;
+            height: 16px;
+            stroke: #9E9E9E;
         }
 
+        /* 头像比例恢复 */
         .avatar-img {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 6px;
             object-fit: cover;
-            background-color: #E5E5EA;
+            background-color: #F0F0F0;
         }
 
+        /* 原生比例小巧 Toggle */
         .ios-switch {
             appearance: none;
-            width: 51px;
-            height: 31px;
-            border-radius: 31px;
-            background-color: #E9E9EB;
+            width: 44px;
+            height: 26px;
+            border-radius: 26px;
+            background-color: #E9E9EA;
             position: relative;
             outline: none;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background-color 0.25s;
         }
         .ios-switch::before {
             content: '';
             position: absolute;
             top: 2px;
             left: 2px;
-            width: 27px;
-            height: 27px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             background-color: white;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.16), 0 3px 1px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+            transition: transform 0.25s;
         }
-        
-        /* 修正：支付宝蓝色的开关 */
         .ios-switch:checked {
-            background-color: var(--link-blue); 
+            background-color: var(--link-blue); /* 支付宝蓝 */
         }
         .ios-switch:checked::before {
-            transform: translateX(20px);
+            transform: translateX(18px);
         }
 
+        /* 个性签名二级编辑页 */
         #signature-view {
             background-color: var(--bg-color);
         }
-        
         .edit-area-container {
             background-color: var(--cell-bg);
-            margin-top: 12px;
-            padding: 16px;
+            margin: 12px 16px;
+            padding: 14px;
+            border-radius: 10px;
             position: relative;
         }
         .edit-textarea {
             width: 100%;
-            height: 100px;
+            height: 110px;
             border: none;
             outline: none;
-            font-size: 16px;
+            font-size: 15px;
             font-family: inherit;
             resize: none;
             color: var(--text-main);
             background: transparent;
+            line-height: 1.5;
         }
         .char-count {
             position: absolute;
             bottom: 12px;
-            right: 16px;
-            font-size: 14px;
-            color: #C7C7CC; /* 签名页面的字数统计颜色更浅 */
+            right: 14px;
+            font-size: 13px;
+            color: #C7C7CC;
         }
 
-        /* 弹窗及 Action Sheet 样式保持不变 */
+        /* 模态框 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.35);
             display: none;
             justify-content: center;
             align-items: center;
@@ -275,63 +276,63 @@
             width: 270px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 14px;
+            border-radius: 12px;
             text-align: center;
-            padding-top: 20px;
+            padding-top: 18px;
             overflow: hidden;
-            transform: scale(1.1);
+            transform: scale(1.05);
             transition: transform 0.2s;
         }
         .modal-title {
-            font-size: 17px;
-            font-weight: 600;
-            margin-bottom: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 14px;
         }
         .modal-input {
-            width: 238px;
-            height: 30px;
+            width: 236px;
+            height: 32px;
             margin-bottom: 16px;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 5px;
+            border: 1px solid rgba(0,0,0,0.12);
+            border-radius: 6px;
             padding: 0 8px;
             font-size: 14px;
             outline: none;
         }
         .modal-buttons {
             display: flex;
-            border-top: 1px solid rgba(0,0,0,0.1);
+            border-top: 1px solid rgba(0,0,0,0.08);
         }
         .modal-btn {
             flex: 1;
-            padding: 12px 0;
-            font-size: 17px;
+            padding: 11px 0;
+            font-size: 16px;
             color: var(--link-blue);
             cursor: pointer;
         }
         .modal-btn.cancel {
-            border-right: 1px solid rgba(0,0,0,0.1);
+            border-right: 1px solid rgba(0,0,0,0.08);
             font-weight: 400;
         }
         .modal-btn.confirm {
-            font-weight: 600;
+            font-weight: 500;
         }
 
+        /* Action Sheet */
         .action-sheet-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.35);
             display: none;
             flex-direction: column;
             justify-content: flex-end;
             z-index: 100;
             padding: 8px;
-            padding-bottom: calc(8px + env(safe-area-inset-bottom));
             opacity: 0;
             transition: opacity 0.2s;
         }
         .action-sheet-group {
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 14px;
+            border-radius: 12px;
             margin-bottom: 8px;
             overflow: hidden;
             transform: translateY(100%);
@@ -339,19 +340,19 @@
         }
         .action-btn {
             width: 100%;
-            padding: 16px;
+            padding: 15px;
             text-align: center;
-            font-size: 20px;
+            font-size: 17px;
             color: var(--link-blue);
             background: transparent;
             border: none;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
         }
         .action-btn:last-child {
             border-bottom: none;
         }
         .action-btn.cancel {
-            font-weight: 600;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -359,12 +360,12 @@
 
     <input type="file" id="avatar-input" accept="image/*" style="display: none;">
 
+    <!-- 视图 1：主个人资料页 -->
     <div id="main-view" class="view-container">
         <div class="navbar">
             <div class="nav-left">
-                <!-- 原生精细返回箭头 -->
-                <svg class="icon-back" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 19 8 12 15 5"></polyline>
+                <svg class="icon-back" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
             </div>
             <div class="nav-center">个人资料</div>
@@ -372,35 +373,38 @@
         </div>
         
         <div class="content">
-            <div class="section-group">
+            <!-- 卡片 1：基础信息组 -->
+            <div class="card-group">
                 <div class="cell" onclick="triggerAvatar()">
                     <span class="cell-label">头像</span>
                     <div class="cell-value-box">
                         <img id="val-avatar" class="avatar-img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
-                        <!-- 原生精细右箭头 -->
-                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 19 16 12 9 5"></polyline>
+                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </div>
                 </div>
                 <div class="cell">
                     <span class="cell-label">我的二维码</span>
                     <div class="cell-value-box">
-                        <!-- 原生细线二维码图标 -->
                         <svg class="icon-qr" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7" rx="1.2"></rect>
                             <rect x="14" y="3" width="7" height="7" rx="1.2"></rect>
                             <rect x="14" y="14" width="7" height="7" rx="1.2"></rect>
                             <rect x="3" y="14" width="7" height="7" rx="1.2"></rect>
                         </svg>
-                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 19 16 12 9 5"></polyline></svg>
+                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>
                 <div class="cell" onclick="editField('nickname', '修改昵称', 'text')">
                     <span class="cell-label">昵称</span>
                     <div class="cell-value-box">
                         <span class="cell-value" id="val-nickname"></span>
-                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 19 16 12 9 5"></polyline></svg>
+                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>
                 <div class="cell" onclick="openGenderPicker()">
@@ -413,25 +417,29 @@
                     <span class="cell-label">地区</span>
                     <div class="cell-value-box">
                         <span class="cell-value" id="val-region"></span>
-                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 19 16 12 9 5"></polyline></svg>
+                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>
                 <div class="cell" onclick="openSignature()">
                     <span class="cell-label">个性签名</span>
                     <div class="cell-value-box">
                         <span class="cell-value" id="val-signature"></span>
-                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 19 16 12 9 5"></polyline></svg>
+                        <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>
             </div>
 
             <div class="section-header">年龄来自支付宝实名信息，仅用作展示，关闭后将不会公开</div>
-            <div class="section-group" style="margin-top: 0;">
+            <!-- 卡片 2：年龄组 -->
+            <div class="card-group">
                 <div class="cell cell-no-active">
                     <span class="cell-label">公开我的年龄</span>
                     <div class="cell-value-box">
-                        <!-- 默认开启状态 -->
-                        <input type="checkbox" class="ios-switch" checked>
+                        <input type="checkbox" id="switch-age" class="ios-switch" onchange="toggleState('showAge', this.checked)">
                     </div>
                 </div>
                 <div class="cell" onclick="editField('age', '修改年龄', 'number')">
@@ -443,35 +451,36 @@
             </div>
 
             <div class="section-header">管理我在个人信息页展示的动态内容</div>
-            <div class="section-group" style="margin-top: 0;">
+            <!-- 卡片 3：动态组 -->
+            <div class="card-group">
                 <div class="cell cell-no-active">
                     <span class="cell-label">公开我的动态</span>
                     <div class="cell-value-box">
-                        <input type="checkbox" class="ios-switch">
+                        <input type="checkbox" id="switch-dynamic" class="ios-switch" onchange="toggleState('showDynamic', this.checked)">
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 个性签名编辑页 -->
+    <!-- 视图 2：个性签名编辑页 -->
     <div id="signature-view" class="view-container view-hidden">
         <div class="navbar">
             <div class="nav-left" onclick="closeSignature()">
-                <svg class="icon-back" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 19 8 12 15 5"></polyline>
+                <svg class="icon-back" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
             </div>
             <div class="nav-center">个性签名</div>
             <div class="nav-right" onclick="saveSignature()">保存</div>
         </div>
         <div class="edit-area-container">
-            <textarea id="edit-signature" class="edit-textarea" maxlength="20" placeholder=""></textarea>
+            <textarea id="edit-signature" class="edit-textarea" maxlength="20"></textarea>
             <span id="char-count" class="char-count">20</span>
         </div>
     </div>
 
-    <!-- iOS 输入弹窗 -->
+    <!-- 弹窗 -->
     <div id="ios-modal" class="modal-overlay">
         <div class="modal-box" id="modal-box">
             <div class="modal-title" id="modal-title">标题</div>
@@ -483,7 +492,7 @@
         </div>
     </div>
 
-    <!-- iOS 性别选择 -->
+    <!-- 性别 Action Sheet -->
     <div id="action-sheet" class="action-sheet-overlay">
         <div class="action-sheet-group" id="as-group-1">
             <button class="action-btn" onclick="setGender('女')">女</button>
@@ -502,10 +511,12 @@
             gender: '女',
             region: '上海 浦东新区',
             signature: 'Angel user',
-            age: 17
+            age: 17,
+            showAge: true,
+            showDynamic: false
         };
 
-        let profile = JSON.parse(localStorage.getItem('ios_profile_v2')) || defaultProfile;
+        let profile = JSON.parse(localStorage.getItem('ios_profile_card_v1')) || defaultProfile;
         let currentEditField = '';
 
         function renderProfile() {
@@ -514,6 +525,9 @@
             document.getElementById('val-region').innerText = profile.region;
             document.getElementById('val-signature').innerText = profile.signature;
             document.getElementById('val-age').innerText = profile.age;
+            
+            document.getElementById('switch-age').checked = profile.showAge;
+            document.getElementById('switch-dynamic').checked = profile.showDynamic;
             
             const avatarImg = document.getElementById('val-avatar');
             if (profile.avatar) {
@@ -525,8 +539,13 @@
         }
 
         function saveToLocal() {
-            localStorage.setItem('ios_profile_v2', JSON.stringify(profile));
+            localStorage.setItem('ios_profile_card_v1', JSON.stringify(profile));
             renderProfile();
+        }
+
+        function toggleState(field, value) {
+            profile[field] = value;
+            saveToLocal();
         }
 
         function triggerAvatar() {
@@ -551,7 +570,7 @@
 
         function openSignature() {
             editSignatureInput.value = profile.signature;
-            updateCharCount();
+            charCount.innerText = editSignatureInput.value.length;
             signatureView.style.display = 'flex';
             setTimeout(() => {
                 signatureView.classList.remove('view-hidden');
@@ -574,11 +593,9 @@
             closeSignature();
         }
 
-        editSignatureInput.addEventListener('input', updateCharCount);
-        function updateCharCount() {
-            // 实时显示字数长度
-            charCount.innerText = editSignatureInput.value.length; 
-        }
+        editSignatureInput.addEventListener('input', function() {
+            charCount.innerText = this.value.length;
+        });
 
         const modal = document.getElementById('ios-modal');
         const modalBox = document.getElementById('modal-box');
@@ -600,7 +617,7 @@
 
         function closeModal() {
             modal.style.opacity = '0';
-            modalBox.style.transform = 'scale(1.1)';
+            modalBox.style.transform = 'scale(1.05)';
             setTimeout(() => {
                 modal.style.display = 'none';
             }, 200);
