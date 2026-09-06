@@ -14,11 +14,11 @@
 
     <style>
         :root {
-            --bg-color: #F7F7F7; /* 原图为极淡浅灰背景 */
+            --bg-color: #F7F7F7;
             --cell-bg: #FFFFFF;
             --text-main: #1A1A1A;
             --text-sub: #9E9E9E;
-            --link-blue: #1677FF; /* 支付宝经典蓝 */
+            --link-blue: #1677FF; 
             --divider: #F0F0F0;
         }
 
@@ -53,14 +53,16 @@
             transform: translateX(100%);
         }
 
-        /* 顶部导航栏（无状态栏，直接从页面顶部开始） */
+        /* 导航栏：加入安全区高度防刘海遮挡 */
         .navbar {
-            height: 44px;
+            height: calc(44px + env(safe-area-inset-top));
+            padding-top: env(safe-area-inset-top);
             background-color: var(--bg-color);
             display: flex;
-            align-items: center;
+            align-items: flex-end; 
             justify-content: space-between;
-            padding: 0 16px;
+            padding-left: 12px;
+            padding-right: 16px;
             position: relative;
             z-index: 10;
         }
@@ -68,7 +70,7 @@
         .nav-left, .nav-right {
             display: flex;
             align-items: center;
-            height: 44px;
+            height: 44px; 
             cursor: pointer;
             position: relative;
             z-index: 2;
@@ -84,6 +86,9 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
+            bottom: 0; 
+            height: 44px;
+            line-height: 44px;
             font-size: 17px;
             font-weight: 500;
             color: var(--text-main);
@@ -99,13 +104,12 @@
         .content {
             flex: 1;
             overflow-y: auto;
-            padding: 8px 16px 40px 16px; /* 露出左右浅灰背景 */
+            padding: 8px 16px 40px 16px;
         }
 
-        /* 原生 Inset Grouped 圆角卡片 */
         .card-group {
             background-color: var(--cell-bg);
-            border-radius: 10px; /* 原生自然小圆角 */
+            border-radius: 10px;
             overflow: hidden;
         }
 
@@ -152,7 +156,7 @@
 
         .cell-label {
             font-size: 15px;
-            font-weight: 400; /* 原图较细主文字 */
+            font-weight: 400;
             color: var(--text-main);
             flex-shrink: 0;
         }
@@ -174,7 +178,7 @@
             text-overflow: ellipsis;
         }
 
-        /* 极细极浅右箭头 */
+        /* 统一的箭头占位宽度，保证所有文本右边缘严格对齐 */
         .icon-arrow {
             width: 15px;
             height: 15px;
@@ -182,23 +186,21 @@
             margin-left: 4px;
         }
 
-        /* 二维码细线小图标 */
         .icon-qr {
             width: 16px;
             height: 16px;
             stroke: #9E9E9E;
         }
 
-        /* 头像比例恢复 */
+        /* 还原原图的小巧头像尺寸 */
         .avatar-img {
-            width: 52px;
-            height: 52px;
+            width: 40px;
+            height: 40px;
             border-radius: 6px;
             object-fit: cover;
             background-color: #F0F0F0;
         }
 
-        /* 原生比例小巧 Toggle */
         .ios-switch {
             appearance: none;
             width: 44px;
@@ -223,13 +225,12 @@
             transition: transform 0.25s;
         }
         .ios-switch:checked {
-            background-color: var(--link-blue); /* 支付宝蓝 */
+            background-color: var(--link-blue); 
         }
         .ios-switch:checked::before {
             transform: translateX(18px);
         }
 
-        /* 个性签名二级编辑页 */
         #signature-view {
             background-color: var(--bg-color);
         }
@@ -260,7 +261,7 @@
             color: #C7C7CC;
         }
 
-        /* 模态框 */
+        /* 弹窗样式 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -317,7 +318,7 @@
             font-weight: 500;
         }
 
-        /* Action Sheet */
+        /* Action Sheet 样式 */
         .action-sheet-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -327,6 +328,7 @@
             justify-content: flex-end;
             z-index: 100;
             padding: 8px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
             opacity: 0;
             transition: opacity 0.2s;
         }
@@ -360,7 +362,6 @@
 
     <input type="file" id="avatar-input" accept="image/*" style="display: none;">
 
-    <!-- 视图 1：主个人资料页 -->
     <div id="main-view" class="view-container">
         <div class="navbar">
             <div class="nav-left">
@@ -373,7 +374,6 @@
         </div>
         
         <div class="content">
-            <!-- 卡片 1：基础信息组 -->
             <div class="card-group">
                 <div class="cell" onclick="triggerAvatar()">
                     <span class="cell-label">头像</span>
@@ -411,6 +411,10 @@
                     <span class="cell-label">性别</span>
                     <div class="cell-value-box">
                         <span class="cell-value" id="val-gender"></span>
+                        <!-- 占位隐形箭头：使“女”的右边缘与其他行文本完美对齐 -->
+                        <svg class="icon-arrow" style="visibility: hidden;" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>
                 <div class="cell" onclick="editField('region', '修改地区', 'text')">
@@ -434,7 +438,6 @@
             </div>
 
             <div class="section-header">年龄来自支付宝实名信息，仅用作展示，关闭后将不会公开</div>
-            <!-- 卡片 2：年龄组 -->
             <div class="card-group">
                 <div class="cell cell-no-active">
                     <span class="cell-label">公开我的年龄</span>
@@ -446,12 +449,15 @@
                     <span class="cell-label">年龄</span>
                     <div class="cell-value-box">
                         <span class="cell-value" id="val-age"></span>
+                        <!-- 占位隐形箭头：使“17”的右边缘与其他行文本完美对齐 -->
+                        <svg class="icon-arrow" style="visibility: hidden;" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
                     </div>
                 </div>
             </div>
 
             <div class="section-header">管理我在个人信息页展示的动态内容</div>
-            <!-- 卡片 3：动态组 -->
             <div class="card-group">
                 <div class="cell cell-no-active">
                     <span class="cell-label">公开我的动态</span>
@@ -463,7 +469,7 @@
         </div>
     </div>
 
-    <!-- 视图 2：个性签名编辑页 -->
+    <!-- 签名编辑视图 -->
     <div id="signature-view" class="view-container view-hidden">
         <div class="navbar">
             <div class="nav-left" onclick="closeSignature()">
@@ -480,7 +486,7 @@
         </div>
     </div>
 
-    <!-- 弹窗 -->
+    <!-- 输入修改弹窗 -->
     <div id="ios-modal" class="modal-overlay">
         <div class="modal-box" id="modal-box">
             <div class="modal-title" id="modal-title">标题</div>
@@ -492,7 +498,7 @@
         </div>
     </div>
 
-    <!-- 性别 Action Sheet -->
+    <!-- 性别选择弹窗 -->
     <div id="action-sheet" class="action-sheet-overlay">
         <div class="action-sheet-group" id="as-group-1">
             <button class="action-btn" onclick="setGender('女')">女</button>
@@ -516,7 +522,7 @@
             showDynamic: false
         };
 
-        let profile = JSON.parse(localStorage.getItem('ios_profile_card_v1')) || defaultProfile;
+        let profile = JSON.parse(localStorage.getItem('ios_profile_final')) || defaultProfile;
         let currentEditField = '';
 
         function renderProfile() {
@@ -533,13 +539,13 @@
             if (profile.avatar) {
                 avatarImg.src = profile.avatar;
             } else {
-                avatarImg.style.backgroundColor = '#E5E5EA';
+                avatarImg.style.backgroundColor = '#F0F0F0';
                 avatarImg.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
             }
         }
 
         function saveToLocal() {
-            localStorage.setItem('ios_profile_card_v1', JSON.stringify(profile));
+            localStorage.setItem('ios_profile_final', JSON.stringify(profile));
             renderProfile();
         }
 
@@ -664,3 +670,4 @@
     </script>
 </body>
 </html>
+
