@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>个人资料</title>
+    <style>
+        /* 全局及重置 */
+        :root {
+            --bg-color: #F2F2F7;
+            --cell-bg: #FFFFFF;
+            --text-main: #000000;
+            --text-sub: #8A8A8E;
+            --link-blue: #007AFF;
+            --divider: #E5E5EA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden; /* 防止原生滚动反弹问题，由内部视图滚动 */
+        }
+
+        /* 视图切换容器 */
+        .view-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .view-hidden {
+            transform: translateX(100%);
+        }
+
+        /* 导航栏 (无状态栏版) */
+        .navbar {
+            height: 44px;
+            background-color: var(--cell-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 17px;
+            font-weight: 500;
+            position: relative;
+            z-index: 10;
+        }
+
+        .navbar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.05); /* 极浅的分割线 */
+            transform: scaleY(0.5);
+        }
+
+        .nav-left, .nav-right {
+            width: 60px;
+            display: flex;
+            align-items: center;
+            color: var(--link-blue);
+            cursor: pointer;
+            font-weight: 400;
+        }
+        
+        .nav-right {
+            justify-content: flex-end;
+        }
+
+        .nav-center {
+            flex: 1;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .nav-back-icon {
+            font-size: 28px;
+            font-weight: 300;
+            margin-right: 4px;
+            margin-top: -2px;
+            color: var(--text-main);
+        }
+
+        /* 滚动内容区 */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* 列表组 */
+        .section-group {
+            margin-top: 16px;
+            background-color: var(--cell-bg);
+        }
+
+        .section-header {
+            padding: 24px 16px 6px;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        /* 列表项 */
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 52px;
+            padding: 12px 16px;
+            background-color: var(--cell-bg);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .cell:active {
+            background-color: #E5E5EA;
+        }
+
+        .cell-no-active:active {
+            background-color: var(--cell-bg);
+        }
+
+        .cell::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 16px;
+            right: 0;
+            height: 1px;
+            background-color: var(--divider);
+            transform: scaleY(0.5);
+        }
+        .cell:last-child::after {
+            display: none;
+        }
+
+        .cell-label {
+            font-size: 16px;
+            color: var(--text-main);
+            flex-shrink: 0;
+        }
+
+        .cell-value-box {
+            display: flex;
+            align-items: center;
+            color: var(--text-sub);
+            font-size: 16px;
+            flex: 1;
+            justify-content: flex-end;
+            margin-left: 16px;
+        }
+
+        .cell-value {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .arrow {
+            color: #C7C7CC;
+            font-size: 20px;
+            margin-left: 8px;
+            font-family: serif;
+        }
+
+        /* 头像 */
+        .avatar-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            background-color: #E5E5EA;
+        }
+
+        /* 开关组件 */
+        .ios-switch {
+            appearance: none;
+            width: 51px;
+            height: 31px;
+            border-radius: 31px;
+            background-color: #E9E9EB;
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .ios-switch::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+            background-color: white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15), 0 1px 1px rgba(0,0,0,0.16), 0 3px 1px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .ios-switch:checked {
+            background-color: #34C759;
+        }
+        .ios-switch:checked::before {
+            transform: translateX(20px);
+        }
+
+        /* 二维码占位图标 */
+        .qr-icon {
+            font-size: 18px;
+            color: var(--text-sub);
+            letter-spacing: -2px;
+        }
+
+        /* 个性签名编辑页专用 */
+        #signature-view {
+            background-color: var(--bg-color);
+        }
+        .edit-area-container {
+            background-color: var(--cell-bg);
+            margin-top: 16px;
+            padding: 12px 16px;
+            position: relative;
+        }
+        .edit-textarea {
+            width: 100%;
+            height: 120px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            font-family: inherit;
+            resize: none;
+            color: var(--text-main);
+            background: transparent;
+        }
+        .char-count {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        /* 自定义 iOS 弹窗 (用于输入) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .modal-box {
+            width: 270px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            text-align: center;
+            padding-top: 20px;
+            overflow: hidden;
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+        .modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        .modal-input {
+            width: 238px;
+            height: 30px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 5px;
+            padding: 0 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        .modal-buttons {
+            display: flex;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px 0;
+            font-size: 17px;
+            color: var(--link-blue);
+            cursor: pointer;
+        }
+        .modal-btn.cancel {
+            border-right: 1px solid rgba(0,0,0,0.1);
+            font-weight: 400;
+        }
+        .modal-btn.confirm {
+            font-weight: 600;
+        }
+
+        /* 自定义 Action Sheet (用于性别) */
+        .action-sheet-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end;
+            z-index: 100;
+            padding: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .action-sheet-group {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 14px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            transform: translateY(100%);
+            transition: transform 0.2s;
+        }
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            text-align: center;
+            font-size: 20px;
+            color: var(--link-blue);
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .action-btn:last-child {
+            border-bottom: none;
+        }
+        .action-btn.cancel {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <input type="file" id="avatar-input" accept="image/*" style="display: none;">
+
+    <div id="main-view" class="view-container">
+        <div class="navbar">
+            <div class="nav-left">
+                <span class="nav-back-icon">‹</span>
+            </div>
+            <div class="nav-center">个人资料</div>
+            <div class="nav-right">隐私</div>
+        </div>
+        
+        <div class="content">
+            <div class="section-group">
+                <div class="cell" onclick="triggerAvatar()">
+                    <span class="cell-label">头像</span>
+                    <div class="cell-value-box">
+                        <img id="val-avatar" class="avatar-img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
+                        <span class="arrow">›</span>
+                    </div>
+                </div>
+                <div class="cell">
+                    <span class="cell-label">我的二维码</span>
+                    <div class="cell-value-box">
+                        <span class="qr-icon">㗊</span>
+                        <span class="arrow">›</span>
+                    </div>
+                </div>
+                <div class="cell" onclick="editField('nickname', '修改昵称', 'text')">
+                    <span class="cell-label">昵称</span>
+                    <div class="cell-value-box">
+                        <span class="cell-value" id="val-nickname"></span>
+                        <span class="arrow">›</span>
+                    </div>
+                </div>
+                <div class="cell" onclick="openGenderPicker()">
+                    <span class="cell-label">性别</span>
+                    <div class="cell-value-box">
+                        <span class="cell-value" id="val-gender"></span>
+                    </div>
+                </div>
+                <div class="cell" onclick="editField('region', '修改地区', 'text')">
+                    <span class="cell-label">地区</span>
+                    <div class="cell-value-box">
+                        <span class="cell-value" id="val-region"></span>
+                        <span class="arrow">›</span>
+                    </div>
+                </div>
+                <div class="cell" onclick="openSignature()">
+                    <span class="cell-label">个性签名</span>
+                    <div class="cell-value-box">
+                        <span class="cell-value" id="val-signature"></span>
+                        <span class="arrow">›</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">年龄来自支付宝实名信息，仅用作展示，关闭后将不会公开</div>
+            <div class="section-group" style="margin-top: 0;">
+                <div class="cell cell-no-active">
+                    <span class="cell-label">公开我的年龄</span>
+                    <div class="cell-value-box">
+                        <input type="checkbox" class="ios-switch">
+                    </div>
+                </div>
+                <div class="cell" onclick="editField('age', '修改年龄', 'number')">
+                    <span class="cell-label">年龄</span>
+                    <div class="cell-value-box">
+                        <span class="cell-value" id="val-age"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">管理我在个人信息页展示的动态内容</div>
+            <div class="section-group" style="margin-top: 0;">
+                <div class="cell cell-no-active">
+                    <span class="cell-label">公开我的动态</span>
+                    <div class="cell-value-box">
+                        <input type="checkbox" class="ios-switch">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="signature-view" class="view-container view-hidden">
+        <div class="navbar">
+            <div class="nav-left" onclick="closeSignature()">
+                <span class="nav-back-icon">‹</span>
+            </div>
+            <div class="nav-center">个性签名</div>
+            <div class="nav-right" onclick="saveSignature()">保存</div>
+        </div>
+        <div class="edit-area-container">
+            <textarea id="edit-signature" class="edit-textarea" maxlength="20" placeholder=""></textarea>
+            <span id="char-count" class="char-count">20</span>
+        </div>
+    </div>
+
+    <div id="ios-modal" class="modal-overlay">
+        <div class="modal-box" id="modal-box">
+            <div class="modal-title" id="modal-title">标题</div>
+            <input type="text" id="modal-input" class="modal-input">
+            <div class="modal-buttons">
+                <div class="modal-btn cancel" onclick="closeModal()">取消</div>
+                <div class="modal-btn confirm" onclick="confirmModal()">确定</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="action-sheet" class="action-sheet-overlay">
+        <div class="action-sheet-group" id="as-group-1">
+            <button class="action-btn" onclick="setGender('女')">女</button>
+            <button class="action-btn" onclick="setGender('男')">男</button>
+            <button class="action-btn" onclick="setGender('不显示')">不显示</button>
+        </div>
+        <div class="action-sheet-group" id="as-group-2">
+            <button class="action-btn cancel" onclick="closeActionSheet()">取消</button>
+        </div>
+    </div>
+
+    <script>
+        // 初始化数据
+        const defaultProfile = {
+            avatar: '', 
+            nickname: '언니',
+            gender: '女',
+            region: '上海 浦东新区',
+            signature: 'Angel user',
+            age: 17
+        };
+
+        let profile = JSON.parse(localStorage.getItem('ios_profile')) || defaultProfile;
+        
+        // Modal 状态
+        let currentEditField = '';
+
+        // 渲染主页数据
+        function renderProfile() {
+            document.getElementById('val-nickname').innerText = profile.nickname;
+            document.getElementById('val-gender').innerText = profile.gender;
+            document.getElementById('val-region').innerText = profile.region;
+            document.getElementById('val-signature').innerText = profile.signature;
+            document.getElementById('val-age').innerText = profile.age;
+            
+            const avatarImg = document.getElementById('val-avatar');
+            if (profile.avatar) {
+                avatarImg.src = profile.avatar;
+            } else {
+                // 默认占位背景色，避免破图
+                avatarImg.style.backgroundColor = '#E5E5EA';
+                avatarImg.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+            }
+        }
+
+        // 保存数据
+        function saveToLocal() {
+            localStorage.setItem('ios_profile', JSON.stringify(profile));
+            renderProfile();
+        }
+
+        // --- 头像逻辑 ---
+        function triggerAvatar() {
+            document.getElementById('avatar-input').click();
+        }
+
+        document.getElementById('avatar-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                profile.avatar = event.target.result;
+                saveToLocal();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // --- 个性签名视图逻辑 ---
+        const mainView = document.getElementById('main-view');
+        const signatureView = document.getElementById('signature-view');
+        const editSignatureInput = document.getElementById('edit-signature');
+        const charCount = document.getElementById('char-count');
+
+        function openSignature() {
+            editSignatureInput.value = profile.signature;
+            updateCharCount();
+            
+            // 切换视图动画
+            signatureView.style.display = 'flex';
+            setTimeout(() => {
+                signatureView.classList.remove('view-hidden');
+                mainView.classList.add('view-hidden');
+            }, 10);
+            
+            setTimeout(() => { editSignatureInput.focus(); }, 300);
+        }
+
+        function closeSignature() {
+            mainView.classList.remove('view-hidden');
+            signatureView.classList.add('view-hidden');
+            setTimeout(() => {
+                signatureView.style.display = 'none';
+            }, 300);
+        }
+
+        function saveSignature() {
+            profile.signature = editSignatureInput.value;
+            saveToLocal();
+            closeSignature();
+        }
+
+        // 字数统计实时监听
+        editSignatureInput.addEventListener('input', updateCharCount);
+        function updateCharCount() {
+            const max = 20;
+            const current = editSignatureInput.value.length;
+            charCount.innerText = max - current; // 仿 iOS 倒数，也可以直接显示长度 current
+            // 若需严格1:1第二张图，这里直接显示长度
+            charCount.innerText = current; 
+        }
+
+        // --- 弹窗修改逻辑 (昵称、年龄、地区) ---
+        const modal = document.getElementById('ios-modal');
+        const modalBox = document.getElementById('modal-box');
+        const modalInput = document.getElementById('modal-input');
+
+        function editField(fieldKey, title, type) {
+            currentEditField = fieldKey;
+            document.getElementById('modal-title').innerText = title;
+            modalInput.type = type;
+            modalInput.value = profile[fieldKey];
+            
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                modalBox.style.transform = 'scale(1)';
+                modalInput.focus();
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.style.opacity = '0';
+            modalBox.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 200);
+        }
+
+        function confirmModal() {
+            const val = modalInput.value.trim();
+            if (val !== "") {
+                profile[currentEditField] = val;
+                saveToLocal();
+            }
+            closeModal();
+        }
+
+        // --- Action Sheet 逻辑 (性别) ---
+        const actionSheet = document.getElementById('action-sheet');
+        const asGroup1 = document.getElementById('as-group-1');
+        const asGroup2 = document.getElementById('as-group-2');
+
+        function openGenderPicker() {
+            actionSheet.style.display = 'flex';
+            setTimeout(() => {
+                actionSheet.style.opacity = '1';
+                asGroup1.style.transform = 'translateY(0)';
+                asGroup2.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        function closeActionSheet() {
+            actionSheet.style.opacity = '0';
+            asGroup1.style.transform = 'translateY(100%)';
+            asGroup2.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                actionSheet.style.display = 'none';
+            }, 200);
+        }
+
+        function setGender(gender) {
+            profile.gender = gender;
+            saveToLocal();
+            closeActionSheet();
+        }
+
+        // 初始化执行渲染
+        renderProfile();
+    </script>
+</body>
+</html>
